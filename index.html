@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 6px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f1f1f1;
+            border-radius: 6px;
+            display: none;
+            text-align: center;
+        }
+
+        #result a {
+            color: #0066cc;
+            word-break: break-all;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>URL Shortener</h1>
+
+    <p>Paste your long URL below</p>
+
+    <input
+        type="text"
+        id="urlInput"
+        placeholder="https://example.com"
+    >
+
+    <button onclick="shortenURL()">
+        Shorten URL
+    </button>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+    async function shortenURL() {
+
+        const input = document.getElementById("urlInput");
+        const result = document.getElementById("result");
+
+        const url = input.value.trim();
+
+        if (!url) {
+            result.style.display = "block";
+            result.innerHTML = '<span class="error">Please enter a URL.</span>';
+            return;
+        }
+
+        try {
+
+            const response = await fetch("/api/shorten", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    url: url
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to shorten URL");
+            }
+
+            const data = await response.json();
+
+            result.style.display = "block";
+
+            result.innerHTML = `
+                <strong>Your shortened URL:</strong>
+                <br><br>
+                <a href="${data.short_url}" target="_blank">
+                    ${data.short_url}
+                </a>
+            `;
+
+        } catch (error) {
+
+            result.style.display = "block";
+
+            result.innerHTML =
+                '<span class="error">Something went wrong.</span>';
+        }
+    }
+</script>
+
+</body>
+</html>
